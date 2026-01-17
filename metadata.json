@@ -1,0 +1,8 @@
+
+{
+  "name": "Vehicle Booking",
+  "description": "A comprehensive vehicle transport management system for booking, scheduling, and real-time fleet tracking.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
