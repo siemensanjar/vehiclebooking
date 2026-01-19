@@ -1,26 +1,15 @@
 
-[build]
-  command = "npm run build"
-  publish = "dist"
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-
-[build.processing]
-  skip_processing = false
-
-[build.processing.css]
-  bundle = true
-  minify = true
-
-[build.processing.js]
-  bundle = true
-  minify = true
-
-[build.processing.html]
-  pretty_print = true
-
-[build.processing.images]
-  compress = true
+export default defineConfig({
+  plugins: [react()],
+  build: {
+    outDir: 'dist',
+    emptyOutDir: true,
+  },
+  server: {
+    port: 3000,
+    open: true
+  }
+});
