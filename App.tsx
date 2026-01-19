@@ -176,7 +176,7 @@ const App: React.FC = () => {
             <div className="p-2 bg-indigo-600 text-white rounded-xl">
               <Truck size={20} />
             </div>
-            <h1 className="text-xl font-black tracking-tight">FleetManager</h1>
+            <h1 className="text-xl font-black tracking-tight">Vehicle Booking</h1>
           </div>
           
           <div className="flex items-center gap-4">
