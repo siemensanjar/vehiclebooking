@@ -5,7 +5,8 @@ import {
   collection, 
   setDoc, 
   doc, 
-  deleteDoc
+  deleteDoc,
+  getDoc
 } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -39,4 +40,18 @@ export const fbAddBooking = async (booking: any) => {
 
 export const fbAddVehicle = async (vehicle: any) => {
   await setDoc(doc(db, "vehicles", vehicle.id), vehicle);
+};
+
+// Admin Config Helpers
+export const fbGetAdminPassword = async (): Promise<string> => {
+  const docRef = doc(db, "config", "admin");
+  const docSnap = await getDoc(docRef);
+  if (docSnap.exists()) {
+    return docSnap.data().password;
+  }
+  return "1234"; // Default fallback
+};
+
+export const fbUpdateAdminPassword = async (newPassword: string) => {
+  await setDoc(doc(db, "config", "admin"), { password: newPassword });
 };
