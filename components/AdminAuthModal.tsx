@@ -6,9 +6,10 @@ interface AdminAuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  correctPassword: string;
 }
 
-const AdminAuthModal: React.FC<AdminAuthModalProps> = ({ isOpen, onClose, onSuccess }) => {
+const AdminAuthModal: React.FC<AdminAuthModalProps> = ({ isOpen, onClose, onSuccess, correctPassword }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState(false);
 
@@ -16,7 +17,7 @@ const AdminAuthModal: React.FC<AdminAuthModalProps> = ({ isOpen, onClose, onSucc
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === '1234') {
+    if (password === correctPassword) {
       setError(false);
       onSuccess();
       setPassword('');
