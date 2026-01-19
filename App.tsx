@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   Truck, Plus, Activity, AlertTriangle, 
-  Navigation, X, Lock, Unlock, Calendar, CheckCircle, Clock, MapPin, Target, ChevronLeft, ChevronRight
+  Navigation, X, Lock, Unlock, Calendar, CheckCircle, Clock, MapPin, Target, ChevronLeft, ChevronRight, Key
 } from 'lucide-react';
 import { 
   Vehicle, VehicleStatus, Booking, BookingStatus, 
@@ -11,6 +12,7 @@ import VehicleCard from './components/VehicleCard';
 import BookingModal from './components/BookingModal';
 import AddVehicleModal from './components/AddVehicleModal';
 import AdminAuthModal from './components/AdminAuthModal';
+import ChangeAdminPasswordModal from './components/ChangeAdminPasswordModal';
 import { onSnapshot, query } from "firebase/firestore";
 import { 
   vehiclesRef, 
@@ -18,13 +20,16 @@ import {
   fbAddBooking, 
   fbAddVehicle, 
   fbDeleteVehicle, 
-  fbUpdateVehicle 
+  fbUpdateVehicle,
+  fbGetAdminPassword,
+  fbUpdateAdminPassword
 } from './services/firebaseService';
 
 const App: React.FC = () => {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [adminPassword, setAdminPassword] = useState("1234");
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -41,12 +46,19 @@ const App: React.FC = () => {
 
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
   const [selectedVehicleForBooking, setSelectedVehicleForBooking] = useState<Vehicle | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [conflict, setConflict] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
+    const fetchAdminConfig = async () => {
+      const pass = await fbGetAdminPassword();
+      setAdminPassword(pass);
+    };
+    fetchAdminConfig();
+
     const q = query(vehiclesRef);
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const vehicleData: Vehicle[] = [];
@@ -142,6 +154,11 @@ const App: React.FC = () => {
     } catch (err) {}
   };
 
+  const handleChangeAdminPassword = async (newPass: string) => {
+    await fbUpdateAdminPassword(newPass);
+    setAdminPassword(newPass);
+  };
+
   const formatTime = (iso: string) => new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
   // Pagination Logic
@@ -169,16 +186,26 @@ const App: React.FC = () => {
             <div className="p-2.5 bg-indigo-600 text-white rounded-xl shadow-lg shadow-indigo-100">
               <Truck size={20} />
             </div>
-            <h1 className="text-lg md:text-xl font-black tracking-tight text-slate-900">Vehicle Booking</h1>
+            <h1 className="text-lg md:text-xl font-black tracking-tight text-slate-900">FleetManager</h1>
           </div>
           <div className="flex items-center gap-3">
             {isAdminMode && (
-              <button 
-                onClick={() => setIsAddModalOpen(true)} 
-                className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-600 hover:text-white transition-all shadow-sm"
-              >
-                <Plus size={20} />
-              </button>
+              <>
+                <button 
+                  onClick={() => setIsChangePasswordModalOpen(true)} 
+                  title="Security Settings"
+                  className="p-2.5 bg-slate-50 text-slate-400 border border-slate-100 rounded-xl hover:text-indigo-600 hover:bg-indigo-50 transition-all shadow-sm"
+                >
+                  <Key size={20} />
+                </button>
+                <button 
+                  onClick={() => setIsAddModalOpen(true)} 
+                  title="Add Vehicle"
+                  className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-600 hover:text-white transition-all shadow-sm"
+                >
+                  <Plus size={20} />
+                </button>
+              </>
             )}
             <button 
               onClick={() => isAdminMode ? setIsAdminMode(false) : setIsAuthModalOpen(true)}
@@ -342,7 +369,18 @@ const App: React.FC = () => {
         <AddVehicleModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} onAdd={handleAddVehicle} />
       )}
       {isAuthModalOpen && (
-        <AdminAuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} onSuccess={() => { setIsAdminMode(true); setIsAuthModalOpen(false); }} />
+        <AdminAuthModal 
+          isOpen={isAuthModalOpen} 
+          onClose={() => setIsAuthModalOpen(false)} 
+          onSuccess={() => { setIsAdminMode(true); setIsAuthModalOpen(false); }} 
+          correctPassword={adminPassword}
+        />
+      )}
+      {isChangePasswordModalOpen && (
+        <ChangeAdminPasswordModal 
+          onClose={() => setIsChangePasswordModalOpen(false)} 
+          onUpdate={handleChangeAdminPassword} 
+        />
       )}
     </div>
   );
