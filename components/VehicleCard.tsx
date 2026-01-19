@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Vehicle, VehicleStatus, Booking, BookingStatus, VehicleType } from '../types';
-import { Trash2, MapPin, Plus, Truck, Car, Bike, Clock, Edit2, Save, X, ArrowRight, Activity, Calendar } from 'lucide-react';
+import { Trash2, MapPin, Truck, Car, Bike, Clock, Edit2, X, Activity, Calendar, CheckCircle } from 'lucide-react';
 
 interface VehicleCardProps {
   vehicle: Vehicle;
@@ -24,13 +24,13 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
   const [editFields, setEditFields] = useState<Vehicle>({ ...vehicle });
 
   const now = new Date();
+  
+  // Find if there is a booking currently happening for the "Active" info card
   const activeBooking = allVehicleBookings.find(b => 
     b.status === BookingStatus.APPROVED && 
     new Date(b.startTime) <= now && 
     new Date(b.endTime) > now
   );
-
-  const isAvailable = vehicle.status === VehicleStatus.AVAILABLE && !activeBooking;
 
   const handleSave = () => {
     onUpdate(editFields);
@@ -42,12 +42,11 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
     setIsEditing(false);
   };
 
-  const getStatusStyles = (status: VehicleStatus) => {
-    if (activeBooking) return 'bg-indigo-600 text-white shadow-indigo-100';
+  const getStatusStyles = (status: string) => {
     switch (status) {
       case VehicleStatus.AVAILABLE: return 'bg-emerald-500 text-white shadow-emerald-100';
       case VehicleStatus.IN_TRANSIT: return 'bg-indigo-600 text-white shadow-indigo-100';
-      case VehicleStatus.MAINTENANCE: return 'bg-amber-500 text-white shadow-amber-100';
+      case VehicleStatus.MAINTENANCE: return 'bg-rose-500 text-white shadow-rose-100';
       default: return 'bg-slate-500 text-white';
     }
   };
@@ -64,17 +63,13 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
   };
 
   return (
-    <div className={`bg-white rounded-3xl md:rounded-[2.5rem] border overflow-hidden transition-all duration-500 shadow-sm hover:shadow-2xl relative min-h-[340px] flex flex-col group ${isEditing ? 'border-indigo-400 ring-4 ring-indigo-50' : 'border-slate-100 hover:border-indigo-200'}`}>
+    <div className={`bg-white rounded-3xl md:rounded-[2.5rem] border overflow-hidden transition-all duration-500 shadow-sm hover:shadow-2xl relative min-h-[360px] flex flex-col group ${isEditing ? 'border-indigo-400 ring-4 ring-indigo-50' : 'border-slate-100 hover:border-indigo-200'}`}>
       
       <div className="p-6 md:p-8 flex flex-col space-y-5 md:space-y-6 flex-1">
         {!isEditing && (
           <div className="flex justify-between items-start">
             <div className={`p-3 md:p-4 rounded-2xl transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 ${getStatusStyles(vehicle.status)}`}>
               {getVehicleIcon(vehicle.type)}
-            </div>
-            <div className={`px-3 py-1.5 rounded-full text-[8px] md:text-[9px] font-black uppercase tracking-widest shadow-sm flex items-center gap-1.5 md:gap-2 ${getStatusStyles(vehicle.status)}`}>
-              {isAvailable && <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>}
-              {activeBooking ? 'In Use' : vehicle.status}
             </div>
           </div>
         )}
@@ -108,12 +103,17 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
           </div>
         ) : (
           <div className="space-y-4 md:space-y-6 flex-1">
-            <div>
-              <h3 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight leading-tight group-hover:text-indigo-600 transition-colors duration-500 truncate">{vehicle.name}</h3>
-              <div className="flex items-center gap-3 md:gap-4 mt-2 md:mt-3">
-                <span className="text-[9px] md:text-[11px] font-black text-slate-400 uppercase tracking-widest">{vehicle.licensePlate}</span>
-                <span className="w-1.5 h-1.5 bg-slate-100 rounded-full"></span>
-                <span className="text-[9px] md:text-[11px] font-black text-indigo-400 uppercase tracking-widest">{vehicle.type}</span>
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight leading-tight group-hover:text-indigo-600 transition-colors duration-500 truncate">{vehicle.name}</h3>
+                <div className="flex items-center gap-3 md:gap-4 mt-2 md:mt-3">
+                  <span className="text-[9px] md:text-[11px] font-black text-slate-400 uppercase tracking-widest">{vehicle.licensePlate}</span>
+                  <span className="w-1.5 h-1.5 bg-slate-100 rounded-full"></span>
+                  <span className="text-[9px] md:text-[11px] font-black text-indigo-400 uppercase tracking-widest">{vehicle.type}</span>
+                </div>
+              </div>
+              <div className={`px-2 py-1 rounded-md text-[8px] font-black uppercase tracking-tighter ${getStatusStyles(vehicle.status)}`}>
+                 {vehicle.status}
               </div>
             </div>
             
@@ -125,7 +125,9 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
               {activeBooking && (
                 <div className="flex items-center gap-3 md:gap-4 text-white bg-slate-900 py-3 md:py-4 px-4 md:px-5 rounded-2xl shadow-xl">
                   <Activity size={14} className="text-indigo-400 animate-pulse shrink-0" />
-                  <p className="text-[9px] md:text-[11px] font-black truncate tracking-tight uppercase">{activeBooking.userName}</p>
+                  <p className="text-[9px] md:text-[11px] font-black truncate tracking-tight uppercase">
+                    Currently: {activeBooking.userName}
+                  </p>
                 </div>
               )}
             </div>
@@ -136,11 +138,11 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
           <div className="flex gap-2 md:gap-3 mt-auto">
             <button 
               onClick={() => onBook(vehicle)}
-              disabled={vehicle.status === VehicleStatus.MAINTENANCE || !!activeBooking}
-              className={`flex-[3] py-4 md:py-5 rounded-xl md:rounded-2xl font-black text-[9px] md:text-[11px] uppercase tracking-widest transition-all flex items-center justify-center gap-2 md:gap-3 shadow-lg active:scale-95 ${isAvailable ? 'bg-indigo-600 text-white hover:bg-slate-900' : 'bg-slate-50 text-slate-300 cursor-not-allowed shadow-none'}`}
+              disabled={vehicle.status === VehicleStatus.MAINTENANCE}
+              className={`flex-[3] py-4 md:py-5 rounded-xl md:rounded-2xl font-black text-[9px] md:text-[11px] uppercase tracking-widest transition-all flex items-center justify-center gap-2 md:gap-3 shadow-lg active:scale-95 ${vehicle.status !== VehicleStatus.MAINTENANCE ? 'bg-indigo-600 text-white hover:bg-slate-900' : 'bg-slate-50 text-slate-300 cursor-not-allowed shadow-none'}`}
             >
-              {activeBooking ? <Clock size={16} /> : <Calendar size={16} />}
-              {activeBooking ? 'Slot Taken' : isAvailable ? 'Book Slot' : 'Offline'}
+              <Calendar size={16} />
+              Book Slot
             </button>
             
             {isAdminMode && (
