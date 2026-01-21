@@ -187,7 +187,7 @@ const App: React.FC = () => {
             <div className="p-2.5 bg-indigo-600 text-white rounded-xl shadow-lg shadow-indigo-100">
               <Truck size={20} />
             </div>
-            <h1 className="text-lg md:text-xl font-black tracking-tight text-slate-900">FleetManager</h1>
+            <h1 className="text-lg md:text-xl font-black tracking-tight text-slate-900">Vehicle Booking</h1>
           </div>
           <div className="flex items-center gap-3">
             {isAdminMode && (
