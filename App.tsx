@@ -160,6 +160,7 @@ const App: React.FC = () => {
   };
 
   const formatTime = (iso: string) => new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const formatDate = (iso: string) => new Date(iso).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
 
   // Pagination Logic
   const totalPages = Math.ceil(bookings.length / ITEMS_PER_PAGE);
@@ -298,7 +299,9 @@ const App: React.FC = () => {
                         
                         <div className="flex items-center justify-between md:justify-end gap-6 border-t md:border-t-0 pt-4 md:pt-0">
                           <div className="text-left md:text-right space-y-0.5">
-                            <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em]">Time Window</p>
+                            <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                              {formatDate(b.startTime)} • Window
+                            </p>
                             <p className="text-base font-black text-slate-900 tabular-nums">
                               {formatTime(b.startTime)} — {formatTime(b.endTime)}
                             </p>
